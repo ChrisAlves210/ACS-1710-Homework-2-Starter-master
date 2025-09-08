@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Froyo Results</title>
+    </head>
+    <body>
+@app.route('/froyo_results')
+def show_froyo_results():
+    users_froyo_flavor = request.args.get('flavor')
+    return f'You ordered {users_froyo_flavor} flavored Fro-Yo!'
+
+
+
+
+        
+    </body>
+</html>
