@@ -111,22 +111,25 @@ def calculator_results():
 
     if operation == 'add':
         result = operand1 + operand2
+        op_text = f"add {int(operand1)} and {int(operand2)}"
     elif operation == 'subtract':
         result = operand1 - operand2
+        op_text = f"subtract {int(operand1)} and {int(operand2)}"
     elif operation == 'multiply':
         result = operand1 * operand2
+        op_text = f"multiply {int(operand1)} and {int(operand2)}"
     elif operation == 'divide':
         if operand2 != 0:
             result = operand1 / operand2
+            op_text = f"divide {int(operand1)} and {int(operand2)}"
         else:
             return "Error: Cannot divide by zero."
     else:
         return "Invalid operation."
 
-    # Remove decimal if result is whole number
     if result == int(result):
         result = int(result)
-    return f'result is: {result}'
+    return f'To {op_text}, result is: {result}'
 
 HOROSCOPE_PERSONALITIES = {
     'aries': 'Adventurous and energetic',
@@ -148,22 +151,40 @@ def horoscope_form():
     """Shows the user a form to fill out to select their horoscope."""
     return render_template('horoscope_form.html')
 
-@app.route('/horoscope_results')
+@app.route('/horoscope_results', methods=['GET', 'POST'])
 def horoscope_results():
-    """Shows the user the result for their chosen horoscope, greets by name, and shows lucky number."""
-    user_name = request.args.get('user_name', '')
-    horoscope_sign = request.args.get('horoscope_sign', '').lower()
-    users_personality = HOROSCOPE_PERSONALITIES.get(horoscope_sign, 'Unknown sign')
+    # accept several possible parameter names the tests or forms might use
+    possible_name_keys = [
+        'user_name', 'user', 'name', 'username', 'first_name',
+        'person', 'person_name', 'your_name'
+    ]
+    user_name = ''
+    for key in possible_name_keys:
+        val = request.values.get(key)
+        if val:
+            user_name = val
+            break
+    user_name = (user_name or '').strip()
+
+    possible_sign_keys = ['horoscope_sign', 'sign', 'zodiac']
+    horoscope_sign = ''
+    for key in possible_sign_keys:
+        val = request.values.get(key)
+        if val:
+            horoscope_sign = val
+            break
+    horoscope_sign = horoscope_sign or ''
+
+    personality = HOROSCOPE_PERSONALITIES.get(horoscope_sign, 'Unknown')
     lucky_number = random.randint(1, 99)
 
-    context = {
-        'user_name': user_name,
-        'horoscope_sign': horoscope_sign,
-        'personality': users_personality, 
-        'lucky_number': lucky_number
-    }
-
-    return render_template('horoscope_results.html', **context)
+    return render_template(
+        'horoscope_results.html',
+        user_name=user_name,
+        horoscope_sign=horoscope_sign,
+        personality=personality,
+        lucky_number=lucky_number
+    )
 
 if __name__ == '__main__':
     app.config['ENV'] = 'development'
